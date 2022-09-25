@@ -1,0 +1,642 @@
+{
+    "body": {
+        "devices": {
+            "type": "array",
+            "items": {
+                "_id": {
+                    "type": "string",
+                    "example": "70:ee:50:22:a3:00",
+                    "description": "mac address of the device"
+                },
+                "date_setup": {
+                    "type": "number",
+                    "example": 1435834348,
+                    "description": "date when the weather station was set up"
+                },
+                "last_setup": {
+                    "type": "number",
+                    "example": 1435834348,
+                    "description": "timestamp of the last installation"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "NAMain",
+                    "description": "type of the device"
+                },
+                "last_status_store": {
+                    "type": "number",
+                    "example": 1555677748,
+                    "description": "timestamp of the last status update"
+                }
+module_name: {
+type: "string"
+example: "Indoor"
+description: "name of the module"
+                }
+firmware: {
+type: "number"
+example: 137
+description: "version of the software"
+                }
+last_upgrade: {
+type: "number"
+example: 1512405614
+description: "timestamp of the last upgrade"
+                }
+wifi_status: {
+type: "number"
+example: 55
+description: "wifi status per Base station. (86=bad, 56=good)"
+                }
+reachable: {
+type: "boolean"
+example: true
+description: "true if the station connected to Netatmo cloud within the last 4 hours"
+                }
+co2_calibrating: {
+type: "boolean"
+example: false
+description: "true if the station is calibrating"
+                }
+station_name: {
+type: "string"
+example: "Casa"
+description: "name of the station - DO NOT USE ANYMORE - use home_name and module_name instead"
+                }
+data_type: {
+type: "array"
+description: "array of data measured by the device (e.g. "Temperature","Humidity")"
+items: {
+type: "string"
+                    }
+                }
+place: {
+timezone: {
+type: "string"
+example: "Africa/Lagos"
+description: "Timezone"
+                    }
+country: {
+type: "string"
+example: "EG"
+description: "Country"
+                    }
+altitude: {
+type: "number"
+example: 144
+description: "Altitude"
+                    }
+location: {
+type: "array"
+items: {
+example: "30.89600807058707, 29.94281464724796"
+description: "Latitude and longitude"
+                        }
+                    }
+                }
+read_only: {
+type: "boolean"
+example: true
+description: "true if the user owns the station, false if he is invited to a station"
+                }
+home_id: {
+type: "string"
+example: "594xxxxxxxxxdb"
+description: "id of the home where the station is placed"
+                }
+home_name: {
+type: "string"
+example: "Home"
+description: "name of the home where the station is placed"
+                }
+dashboard_data: {
+time_utc: {
+type: "number"
+example: 1555677739
+description: "timestamp when data was measured"
+                    }
+Temperature: {
+type: "number"
+example: 23.7
+description: "temperature (in °C)"
+                    }
+CO2: {
+type: "number"
+example: 967
+description: "CO2 level (in ppm)"
+                    }
+Humidity: {
+type: "number"
+example: 41
+description: "humidity (in %)"
+                    }
+Noise: {
+type: "number"
+example: 42
+description: "noise level (in dB)"
+                    }
+Pressure: {
+type: "number"
+example: 997.6
+description: "surface pressure in mbar"
+                    }
+AbsolutePressure: {
+type: "number"
+example: 1017.4
+description: "sea-level pressure in mbar"
+                    }
+min_temp: {
+type: "number"
+example: 21.2
+                    }
+max_temp: {
+type: "number"
+example: 27.4
+description: "maximum temperature measured"
+                    }
+date_min_temp: {
+type: "number"
+example: 1555631374
+                    }
+date_max_temp: {
+type: "number"
+example: 1555662436
+                    }
+temp_trend: {
+type: "string"
+example: "up"
+description: "trend for the last 12h (up, down, stable)"
+                    }
+pressure_trend: {
+type: "string"
+example: "up"
+description: "trend for the last 12h (up, down, stable)"
+                    }
+                }
+modules: {
+type: "array"
+items: {
+oneOf: [
+                            {
+_id: {
+type: "string"
+example: "06:00:00:02:47:00"
+                                }
+type: {
+type: "string"
+example: "NAModule4"
+                                }
+module_name: {
+type: "string"
+example: "Indoor Module"
+                                }
+data_type: {
+type: "array"
+description: "Array of data measured by the device (e.g. "Temperature","Humidity")"
+items: {
+type: "string"
+example: "Temperature, Humidity, CO2"
+                                    }
+                                }
+last_setup: {
+type: "number"
+example: 1435834348
+description: "timestamp of the last installation"
+                                }
+reachable: {
+type: "boolean"
+example: true
+description: "true if the station connected to Netatmo cloud within the last 4 hours"
+                                }
+dashboard_data: {
+time_utc: {
+type: "number"
+example: 1555677739
+description: "timestamp when data was measured"
+                                    }
+Temperature: {
+type: "number"
+example: 23.7
+description: "temperature (in °C)"
+                                    }
+CO2: {
+type: "number"
+example: 967
+                                    }
+Humidity: {
+type: "number"
+example: 41
+description: "humidity (in %)"
+                                    }
+Pressure: {
+type: "number"
+example: 997.6
+description: "surface pressure in mbar"
+                                    }
+AbsolutePressure: {
+type: "number"
+example: 1017.4
+description: "sea-level pressure in mbar"
+                                    }
+min_temp: {
+type: "number"
+example: 21.2
+                                    }
+max_temp: {
+type: "number"
+example: 27.4
+description: "maximum temperature measured"
+                                    }
+date_min_temp: {
+type: "number"
+example: 1555631374
+                                    }
+date_max_temp: {
+type: "number"
+example: 1555662436
+                                    }
+temp_trend: {
+type: "string"
+example: "up"
+description: "trend for the last 12h (up, down, stable)"
+                                    }
+                                }
+firmware: {
+type: "number"
+example: 19
+description: "version of the software"
+                                }
+last_message: {
+type: "number"
+example: 1555677746
+description: "timestamp of the last measure update"
+                                }
+last_seen: {
+type: "number"
+example: 1555677746
+description: "timestamp of the last status update"
+                                }
+rf_status: {
+type: "number"
+example: 31
+description: "Current radio status per module. (90=low, 60=highest)"
+                                }
+battery_vp: {
+type: "number"
+example: 5148
+description: "current battery status per module"
+                                }
+battery_percent: {
+type: "number"
+example: 58
+description: "Percentage of battery remaining (10=low)"
+                                }
+                            }
+{
+_id: {
+type: "string"
+example: "06:00:00:02:47:00"
+                                }
+type: {
+type: "string"
+example: "NAModule1"
+                                }
+module_name: {
+type: "string"
+example: "Outdoor Module"
+                                }
+data_type: {
+type: "array"
+description: "Array of data measured by the device (e.g. "Temperature","Humidity")"
+items: {
+type: "string"
+example: "Temperature, Humidity"
+                                    }
+                                }
+last_setup: {
+type: "number"
+example: 1435834348
+description: "timestamp of the last installation"
+                                }
+reachable: {
+type: "boolean"
+example: true
+description: "true if the station connected to Netatmo cloud within the last 4 hours"
+                                }
+dashboard_data: {
+time_utc: {
+type: "number"
+example: 1555677739
+description: "timestamp when data was measured"
+                                    }
+Temperature: {
+type: "number"
+example: 23.7
+description: "temperature (in °C)"
+                                    }
+Humidity: {
+type: "number"
+example: 41
+description: "humidity (in %)"
+                                    }
+min_temp: {
+type: "number"
+example: 21.2
+                                    }
+max_temp: {
+type: "number"
+example: 27.4
+description: "maximum temperature measured"
+                                    }
+date_min_temp: {
+type: "number"
+example: 1555631374
+                                    }
+date_max_temp: {
+type: "number"
+example: 1555662436
+                                    }
+temp_trend: {
+type: "string"
+example: "up"
+description: "trend for the last 12h (up, down, stable)"
+                                    }
+                                }
+firmware: {
+type: "number"
+example: 19
+description: "version of the software"
+                                }
+last_message: {
+type: "number"
+example: 1555677746
+description: "timestamp of the last measure update"
+                                }
+last_seen: {
+type: "number"
+example: 1555677746
+description: "timestamp of the last status update"
+                                }
+rf_status: {
+type: "number"
+example: 31
+description: "Current radio status per module. (90=low, 60=highest)"
+                                }
+battery_vp: {
+type: "number"
+example: 5148
+description: "current battery status per module"
+                                }
+battery_percent: {
+type: "number"
+example: 58
+description: "Percentage of battery remaining (10=low)"
+                                }
+                            }
+{
+_id: {
+type: "string"
+example: "06:00:00:02:47:00"
+                                }
+type: {
+type: "string"
+example: "NAModule3"
+                                }
+module_name: {
+type: "string"
+example: "Rain gauge"
+                                }
+data_type: {
+type: "array"
+description: "Array of data measured by the device (e.g. "Temperature","Humidity")"
+items: {
+type: "string"
+example: "Rain"
+                                    }
+                                }
+last_setup: {
+type: "number"
+example: 1435834348
+description: "timestamp of the last installation"
+                                }
+reachable: {
+type: "boolean"
+example: true
+description: "true if the station connected to Netatmo cloud within the last 4 hours"
+                                }
+dashboard_data: {
+time_utc: {
+type: "number"
+example: 1555677734
+description: "timestamp when data was measured"
+                                    }
+Rain: {
+type: "number"
+example: 0
+description: "rain in mm"
+                                    }
+sum_rain_24: {
+type: "number"
+example: 0
+description: "rain measured for past 24h(mm)"
+                                    }
+sum_rain_1: {
+type: "number"
+example: 0
+description: "rain measured for the last hour (mm)"
+                                    }
+                                }
+firmware: {
+type: "number"
+example: 19
+description: "version of the software"
+                                }
+last_message: {
+type: "number"
+example: 1555677746
+description: "timestamp of the last measure update"
+                                }
+last_seen: {
+type: "number"
+example: 1555677746
+description: "timestamp of the last status update"
+                                }
+rf_status: {
+type: "number"
+example: 31
+description: "Current radio status per module. (90=low, 60=highest)"
+                                }
+battery_vp: {
+type: "number"
+example: 5148
+description: "current battery status per module"
+                                }
+battery_percent: {
+type: "number"
+example: 58
+description: "Percentage of battery remaining (10=low)"
+                                }
+                            }
+{
+_id: {
+type: "string"
+example: "06:00:00:02:47:00"
+                                }
+type: {
+type: "string"
+example: "NAModule2"
+                                }
+module_name: {
+type: "string"
+example: "Wind Module"
+                                }
+data_type: {
+type: "array"
+description: "Array of data measured by the device (e.g. "Temperature","Humidity")"
+items: {
+type: "string"
+example: "Wind"
+                                    }
+                                }
+last_setup: {
+type: "number"
+example: 1435834348
+description: "timestamp of the last installation"
+                                }
+battery_percent: {
+type: "number"
+example: 58
+description: "Percentage of battery remaining (10=low)"
+                                }
+reachable: {
+type: "boolean"
+example: true
+description: "true if the station connected to Netatmo cloud within the last 4 hours"
+                                }
+firmware: {
+type: "number"
+example: 19
+description: "version of the software"
+                                }
+last_message: {
+type: "number"
+example: 1555677746
+description: "timestamp of the last measure update"
+                                }
+last_seen: {
+type: "number"
+example: 1555677746
+description: "timestamp of the last status update"
+                                }
+rf_status: {
+type: "number"
+example: 31
+description: "Current radio status per module. (90=low, 60=highest)"
+                                }
+battery_vp: {
+type: "number"
+example: 5148
+description: "current battery status per module"
+                                }
+dashboard_data: {
+time_utc: {
+type: "number"
+example: 1555677734
+description: "timestamp when data was measured"
+                                    }
+WindStrength: {
+type: "number"
+example: 2
+description: "wind strenght (km/h)"
+                                    }
+WindAngle: {
+type: "number"
+example: 75
+                                    }
+GustStrength: {
+type: "number"
+example: 3
+description: "gust strengh (km/h)"
+                                    }
+GustAngle: {
+type: "number"
+example: 75
+description: "gust angle"
+                                    }
+max_wind_str: {
+type: "number"
+example: 4
+                                    }
+max_wind_angle: {
+type: "number"
+example: 100
+                                    }
+date_max_wind_str: {
+type: "number"
+example: 1555673190
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+user: {
+mail: {
+type: "string"
+format: "email"
+example: "name@mail.com"
+            }
+administrative: {
+reg_locale: {
+type: "string"
+example: "fr-FR"
+description: "user regional preferences (used for displaying date)"
+                }
+lang: {
+type: "string"
+example: "fr-FR"
+description: "user locale"
+                }
+country: {
+type: "string"
+example: "FR"
+description: "country"
+                }
+unit: {
+type: "number"
+example: 0
+description: "0 -> metric system, 1 -> imperial system"
+                }
+windunit: {
+type: "number"
+example: 0
+description: "0 -> kph, 1 -> mph, 2 -> ms, 3 -> beaufort, 4 -> knot"
+                }
+pressureunit: {
+type: "number"
+example: 0
+description: "0 -> mbar, 1 -> inHg, 2 -> mmHg"
+                }
+feel_like_algo: {
+type: "number"
+example: 0
+description: "algorithm used to compute feel like temperature, 0 -> humidex, 1 -> heat-index"
+                }
+            }
+        }
+    }
+status: {
+type: "string"
+example: "ok"
+    }
+time_exec: {
+type: "string"
+example: "0.060059070587158"
+    }
+time_server: {
+type: "string"
+example: "1553777827"
+    }
+}
