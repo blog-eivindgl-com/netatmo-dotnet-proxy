@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetatmoProxy", "NetatmoProxy\NetatmoProxy.csproj", "{99220864-580E-4E78-88AE-2DE23DA85CAE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{99220864-580E-4E78-88AE-2DE23DA85CAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99220864-580E-4E78-88AE-2DE23DA85CAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99220864-580E-4E78-88AE-2DE23DA85CAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99220864-580E-4E78-88AE-2DE23DA85CAE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {51F492AA-DC14-4C66-A637-80275F5D66E7}
+	EndGlobalSection
+EndGlobal
