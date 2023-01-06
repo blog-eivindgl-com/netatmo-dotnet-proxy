@@ -4,6 +4,6 @@ namespace NetatmoProxy.Services
 {
     public interface INetatmoApiService
     {
-        Task<GetStationsDataResponse> GetStationsDataAsync(GetStationsDataRequest request);
+        Task<GetStationsDataResponse?> GetStationsDataAsync(GetStationsDataRequest request);
     }
 }

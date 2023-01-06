@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using NetatmoProxy.Configuration;
 using NetatmoProxy.Services;
 
@@ -20,18 +21,19 @@ namespace NetatmoProxy
             builder.Logging.AddConsole();
 
             // Add services to the container.
+            builder.Services.AddMemoryCache();
             var authConfig = new AuthConfig();
             Configuration.Bind("NetatmoApi:Auth", authConfig);
             builder.Services.AddSingleton(authConfig);
             builder.Services.AddSingleton<IAccessTokenService>((sp) =>
             {
-                return new AccessTokenService(authConfig, sp.GetService<ILogger<AccessTokenService>>(), new HttpClientHandler());
+                return new AccessTokenService(authConfig, sp.GetService<ILogger<AccessTokenService>>(), new HttpClientHandler(), sp.GetService<IMemoryCache>());
             });
             var netatmoApiConfig = new NetatmoApiConfig();
             Configuration.Bind("NetatmoApi", netatmoApiConfig);
             builder.Services.AddSingleton<INetatmoApiService>((sp) =>
             {
-                return new NetatmoApiRestService(netatmoApiConfig, sp.GetService<ILogger<NetatmoApiRestService>>(), sp.GetService<IAccessTokenService>(), new HttpClientHandler());
+                return new NetatmoApiRestService(netatmoApiConfig, sp.GetService<ILogger<NetatmoApiRestService>>(), sp.GetService<IAccessTokenService>(), new HttpClientHandler(), sp.GetService<IMemoryCache>());
             });
 
             builder.Services.AddControllers();

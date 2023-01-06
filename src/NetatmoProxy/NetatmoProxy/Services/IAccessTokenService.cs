@@ -2,6 +2,6 @@
 {
     public interface IAccessTokenService
     {
-        Task<string> GetAccessTokenAsync();
+        Task<string> GetAccessTokenAsync(bool forceFullLoad = false);
     }
 }

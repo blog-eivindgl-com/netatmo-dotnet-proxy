@@ -21,8 +21,8 @@ namespace NetatmoProxy.Controllers
         {
             var stationData = await _netatmoApiService.GetStationsDataAsync(new Model.Netatmo.GetStationsDataRequest());
 
-            var indoor = stationData.Body.Devices.First();
-            var outdoor = indoor.Modules.First();
+            var indoor = stationData?.Body?.Devices?.FirstOrDefault();
+            var outdoor = indoor?.Modules?.FirstOrDefault();
 
             string FormatTemperature(decimal temperature)
             {

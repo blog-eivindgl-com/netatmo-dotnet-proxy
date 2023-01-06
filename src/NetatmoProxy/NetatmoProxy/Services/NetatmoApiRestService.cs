@@ -1,23 +1,27 @@
-﻿using NetatmoProxy.Configuration;
+﻿using Microsoft.Extensions.Caching.Memory;
+using NetatmoProxy.Configuration;
 using NetatmoProxy.Model.Netatmo;
 
 namespace NetatmoProxy.Services
 {
     public class NetatmoApiRestService : INetatmoApiService
     {
+        public const string GetStationsDataCacheKey = "StationsData";
         public const string DefaultBaseUri = @"https://api.netatmo.com/api/";
         public const string GetStationsDataUri = "getstationsdata";
         private readonly NetatmoApiConfig _config;
         private readonly ILogger<NetatmoApiRestService> _logger;
         private readonly IAccessTokenService _tokenService;
         private readonly HttpClient _httpClient;
+        private readonly IMemoryCache _memCache;
 
-        public NetatmoApiRestService(NetatmoApiConfig config, ILogger<NetatmoApiRestService> logger, IAccessTokenService accessTokenService, HttpClientHandler httpClientHandler)
+        public NetatmoApiRestService(NetatmoApiConfig config, ILogger<NetatmoApiRestService> logger, IAccessTokenService accessTokenService, HttpClientHandler httpClientHandler, IMemoryCache memCache)
         {
             _config = config;
             _logger = logger;
             _tokenService = accessTokenService;
             _httpClient = new HttpClient(httpClientHandler);
+            _memCache = memCache;
 
             if (string.IsNullOrEmpty(_config?.BaseUri))
             {
@@ -29,7 +33,18 @@ namespace NetatmoProxy.Services
             }
         }
 
-        public async Task<GetStationsDataResponse> GetStationsDataAsync(GetStationsDataRequest request)
+        public async Task<GetStationsDataResponse?> GetStationsDataAsync(GetStationsDataRequest request)
+        {
+            return await _memCache.GetOrCreateAsync(
+                GetStationsDataCacheKey,
+                cacheEntry =>
+                {
+                    cacheEntry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(1); // Cache values for 1 minute so we don't spam netatmo api
+                    return LoadStationsDataAsync(request);
+                });
+        }
+
+        private async Task<GetStationsDataResponse?> LoadStationsDataAsync(GetStationsDataRequest request)
         {
             var requestMessage = new HttpRequestMessage(HttpMethod.Get, GetStationsDataUri);
             requestMessage.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", await _tokenService.GetAccessTokenAsync());
