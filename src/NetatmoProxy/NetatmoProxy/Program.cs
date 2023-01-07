@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using NetatmoProxy.Configuration;
+using NetatmoProxy.Middleware;
 using NetatmoProxy.Services;
 
 namespace NetatmoProxy
@@ -22,6 +23,8 @@ namespace NetatmoProxy
 
             // Add services to the container.
             builder.Services.AddMemoryCache();
+            builder.Services.AddApplicationInsightsTelemetry();
+            builder.Services.AddTransient<ResponseLoggerMiddleware>();
             var authConfig = new AuthConfig();
             Configuration.Bind("NetatmoApi:Auth", authConfig);
             builder.Services.AddSingleton(authConfig);
@@ -51,7 +54,7 @@ namespace NetatmoProxy
             }
 
             app.UseAuthorization();
-
+            app.UseResponseLogger();
 
             app.MapControllers();
 
