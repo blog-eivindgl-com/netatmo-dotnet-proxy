@@ -22,6 +22,7 @@ namespace NetatmoProxy
 
             // Add services to the container.
             builder.Services.AddMemoryCache();
+            builder.Services.AddApplicationInsightsTelemetry();
             var authConfig = new AuthConfig();
             Configuration.Bind("NetatmoApi:Auth", authConfig);
             builder.Services.AddSingleton(authConfig);
