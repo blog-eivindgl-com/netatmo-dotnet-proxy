@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using NetatmoProxy.Configuration;
 using NetatmoProxy.Model.Netatmo;
+using System.Net.Http.Json;
 
 namespace NetatmoProxy.Services
 {

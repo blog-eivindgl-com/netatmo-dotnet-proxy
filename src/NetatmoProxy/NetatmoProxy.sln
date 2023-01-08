@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetatmoProxy", "NetatmoProxy\NetatmoProxy.csproj", "{99220864-580E-4E78-88AE-2DE23DA85CAE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetatmoProxy", "NetatmoProxy\NetatmoProxy.csproj", "{99220864-580E-4E78-88AE-2DE23DA85CAE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetatmoProxy.Services", "NetatmoProxy.Services\NetatmoProxy.Services.csproj", "{74ACBB8A-B566-4D5E-8423-1BCC19CE9EBE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetatmoProxy.Core", "NetatmoProxy.Core\NetatmoProxy.Core.csproj", "{C640DBED-E264-4035-9831-BF51C37AD6D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetatmoProxy.Services.Tests", "NetatmoProxy.Services.Tests\NetatmoProxy.Services.Tests.csproj", "{F202DD51-0175-4E13-A119-6FEBAB62F5C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{99220864-580E-4E78-88AE-2DE23DA85CAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99220864-580E-4E78-88AE-2DE23DA85CAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99220864-580E-4E78-88AE-2DE23DA85CAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74ACBB8A-B566-4D5E-8423-1BCC19CE9EBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74ACBB8A-B566-4D5E-8423-1BCC19CE9EBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74ACBB8A-B566-4D5E-8423-1BCC19CE9EBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74ACBB8A-B566-4D5E-8423-1BCC19CE9EBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C640DBED-E264-4035-9831-BF51C37AD6D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C640DBED-E264-4035-9831-BF51C37AD6D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C640DBED-E264-4035-9831-BF51C37AD6D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C640DBED-E264-4035-9831-BF51C37AD6D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F202DD51-0175-4E13-A119-6FEBAB62F5C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F202DD51-0175-4E13-A119-6FEBAB62F5C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F202DD51-0175-4E13-A119-6FEBAB62F5C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F202DD51-0175-4E13-A119-6FEBAB62F5C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
