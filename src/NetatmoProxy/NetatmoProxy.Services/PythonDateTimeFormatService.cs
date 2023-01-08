@@ -13,7 +13,7 @@ namespace NetatmoProxy.Services
 
         public string StrfTime(string timezone, string format)
         {
-            var now = _nowService.DateTimeOffsetNow;
+            var now = TimeZoneInfo.ConvertTimeFromUtc(_nowService.UtcNow.DateTime, TimeZoneInfo.FindSystemTimeZoneById(NetTimeZoneInfoFromPythonTimeZone(timezone)));
             string strfTime = FormatPythonDayOfYear(now, format);
             strfTime = FormatPythonDayOfWeek(now, strfTime);
             strfTime = FormatPythonTimezoneName(timezone, strfTime);
@@ -22,6 +22,18 @@ namespace NetatmoProxy.Services
 
 
             return strfTime;
+        }
+
+        public string NetTimeZoneInfoFromPythonTimeZone(string timezone)
+        {
+            switch(timezone)
+            {
+                case @"Europe/Oslo":
+                    return "W. Europe Standard Time";
+                default:
+                    // TODO: Support other timezones than Europe/Oslo
+                    throw new ArgumentOutOfRangeException(nameof(timezone), "Only timezone Europe/Oslo is supported");
+            }
         }
 
         public string FormatPythonOffset(DateTimeOffset now, string strfTime)

@@ -16,6 +16,7 @@ namespace NetatmoProxy.Services.Tests
             _nowServiceMock = new Mock<INowService>();
             _nowServiceMock.Setup(s => s.DateTimeNow).Returns(_mockedNow.DateTime);
             _nowServiceMock.Setup(s => s.DateTimeOffsetNow).Returns(_mockedNow);
+            _nowServiceMock.Setup(s => s.UtcNow).Returns(_mockedNow.ToUniversalTime());
             _service = new PythonDateTimeFormatService(_nowServiceMock.Object);
         }
 
