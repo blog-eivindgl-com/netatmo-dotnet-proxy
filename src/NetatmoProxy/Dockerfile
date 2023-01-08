@@ -8,6 +8,9 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY NetatmoProxy.sln ./
 COPY ./NetatmoProxy/NetatmoProxy.csproj ./NetatmoProxy/
+COPY ./NetatmoProxy.Core/NetatmoProxy.Core.csproj ./NetatmoProxy.Core/
+COPY ./NetatmoProxy.Services/NetatmoProxy.Services.csproj ./NetatmoProxy.Services/
+COPY ./NetatmoProxy.Services.Tests/NetatmoProxy.Services.Tests.csproj ./NetatmoProxy.Services.Tests/
 RUN dotnet restore "NetatmoProxy.sln"
 COPY . .
 WORKDIR /src
