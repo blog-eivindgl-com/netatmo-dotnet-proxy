@@ -6,6 +6,6 @@
 
         public DateTimeOffset DateTimeOffsetNow => DateTimeOffset.Now;
 
-        public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
+        public DateTime UtcNow => DateTime.UtcNow;
     }
 }

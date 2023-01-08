@@ -7,7 +7,7 @@ namespace NetatmoProxy.Services.Tests
 {
     public class PythonDateTimeFormatService_StrfFormatShould
     {
-        private readonly DateTimeOffset _mockedNow = DateTimeOffset.ParseExact("2023-02-15 14:15:16.123 +01:00", "yyyy-MM-dd HH:mm:ss.fff zzz", CultureInfo.CurrentCulture);
+        private readonly DateTimeOffset _mockedNow = DateTimeOffset.ParseExact("2023-02-15 13:15:16.123", "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
         private readonly Mock<INowService> _nowServiceMock;
         private readonly PythonDateTimeFormatService _service;
 
@@ -16,7 +16,7 @@ namespace NetatmoProxy.Services.Tests
             _nowServiceMock = new Mock<INowService>();
             _nowServiceMock.Setup(s => s.DateTimeNow).Returns(_mockedNow.DateTime);
             _nowServiceMock.Setup(s => s.DateTimeOffsetNow).Returns(_mockedNow);
-            _nowServiceMock.Setup(s => s.UtcNow).Returns(_mockedNow.ToUniversalTime());
+            _nowServiceMock.Setup(s => s.UtcNow).Returns(_mockedNow.UtcDateTime);
             _service = new PythonDateTimeFormatService(_nowServiceMock.Object);
         }
 

@@ -13,7 +13,7 @@ namespace NetatmoProxy.Services
 
         public string StrfTime(string timezone, string format)
         {
-            var now = TimeZoneInfo.ConvertTimeFromUtc(_nowService.UtcNow.DateTime, TimeZoneInfo.FindSystemTimeZoneById(NetTimeZoneInfoFromPythonTimeZone(timezone)));
+            var now = TimeZoneInfo.ConvertTimeFromUtc(_nowService.UtcNow, TimeZoneInfo.FindSystemTimeZoneById(NetTimeZoneInfoFromPythonTimeZone(timezone)));
             string strfTime = FormatPythonDayOfYear(now, format);
             strfTime = FormatPythonDayOfWeek(now, strfTime);
             strfTime = FormatPythonTimezoneName(timezone, strfTime);
