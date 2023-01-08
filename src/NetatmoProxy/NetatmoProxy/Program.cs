@@ -25,6 +25,8 @@ namespace NetatmoProxy
             builder.Services.AddMemoryCache();
             builder.Services.AddApplicationInsightsTelemetry();
             builder.Services.AddTransient<ResponseLoggerMiddleware>();
+            builder.Services.AddTransient<INowService, NowService>();
+            builder.Services.AddTransient<IPythonDateTimeFormatService, PythonDateTimeFormatService>();
             var authConfig = new AuthConfig();
             Configuration.Bind("NetatmoApi:Auth", authConfig);
             builder.Services.AddSingleton(authConfig);
