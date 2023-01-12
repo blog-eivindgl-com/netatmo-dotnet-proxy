@@ -20,6 +20,8 @@ FROM build AS publish
 RUN dotnet publish "NetatmoProxy/NetatmoProxy.csproj" -c Release -o /app/publish
 
 FROM base AS final
+RUN apt update && apt install tzdata -y
+ENV TZ="Europe/Oslo"
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "NetatmoProxy.dll"]
