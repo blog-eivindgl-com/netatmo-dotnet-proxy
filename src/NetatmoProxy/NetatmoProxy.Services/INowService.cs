@@ -4,5 +4,6 @@
     {
         DateTime DateTimeNow { get; }
         DateTimeOffset DateTimeOffsetNow { get; }
+        DateTime UtcNow { get; }
     }
 }

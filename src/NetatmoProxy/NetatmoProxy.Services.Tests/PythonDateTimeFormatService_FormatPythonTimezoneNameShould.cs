@@ -17,19 +17,20 @@ namespace NetatmoProxy.Services.Tests
             _service = new PythonDateTimeFormatService(_nowServiceMock.Object);
         }
 
-        [Fact]
-        public void Return_CET_For_EuropeOslo()
+        [Theory]
+        [InlineData(@"Europe/Oslo", "CET")]
+        [InlineData(@"Europe/Tallinn", "EET")]
+        [InlineData(@"America/Chicago", "CST")]
+        public void Return_CET_For_EuropeOslo(string timezone, string expectedPythonTimeZoneName)
         {
             // Arrange
-            string timezone = @"Europe/Oslo";
             string strfTime = "%Z";
-            string expectedResult = "CET";
 
             // Act
             string actualResult = _service.FormatPythonTimezoneName(timezone, strfTime);
 
             // Assert
-            actualResult.ShouldBe(expectedResult);
+            actualResult.ShouldBe(expectedPythonTimeZoneName);
         }
 
         [Theory]
@@ -41,7 +42,7 @@ namespace NetatmoProxy.Services.Tests
             // Arrange
             string strfTime = "%Z";
             Exception actualException = null;
-            string expectedErrorMessage = "Only timezone Europe/Oslo is supported (Parameter 'timezone')";
+            string expectedErrorMessage = @"Only timezones Europe/Oslo, Europe/Tallinn and America/Chicago are supported (Parameter 'timezone')";
             string actualResult = null;
 
             // Act

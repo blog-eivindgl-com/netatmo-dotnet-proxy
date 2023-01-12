@@ -1,9 +1,18 @@
-﻿using System.Globalization;
-
-namespace NetatmoProxy.Services
+﻿namespace NetatmoProxy.Services
 {
     public class PythonDateTimeFormatService : IPythonDateTimeFormatService
     {
+        public const string SupportedTimezonesErrorMessage = @"Only timezones Europe/Oslo, Europe/Tallinn and America/Chicago are supported";
+        public const string AdafruitTimezoneEuropeOslo = @"Europe/Oslo";
+        public const string AdafruitTimezoneEuropeTallinn = @"Europe/Tallinn";
+        public const string AdafruitTimezoneAmericaChicago = @"America/Chicago";
+        public const string PythonTimezoneCET = "CET";
+        public const string PythonTimezoneEET = "EET";
+        public const string PythonTimezoneCST = "CST";
+        public const string NetTimezoneWestEuropeStandardTime = "W. Europe Standard Time";
+        public const string NetTimezoneEastEuropeStandardTime = "E. Europe Standard Time";
+        public const string NetTimezoneCentralStandardTime = "Central Standard Time";
+
         private readonly INowService _nowService;
 
         public PythonDateTimeFormatService(INowService nowService)
@@ -13,23 +22,40 @@ namespace NetatmoProxy.Services
 
         public string StrfTime(string timezone, string format)
         {
-            var now = _nowService.DateTimeOffsetNow;
+            var tzi = TimeZoneInfo.FindSystemTimeZoneById(NetTimeZoneInfoFromPythonTimeZone(timezone));
+            var now = TimeZoneInfo.ConvertTimeFromUtc(_nowService.UtcNow, tzi);
             string strfTime = FormatPythonDayOfYear(now, format);
             strfTime = FormatPythonDayOfWeek(now, strfTime);
             strfTime = FormatPythonTimezoneName(timezone, strfTime);
-            strfTime = FormatPythonOffset(now, strfTime);
+            strfTime = FormatPythonOffset(now, tzi, strfTime);
             strfTime = now.ToString(ToCompatibleFormat(strfTime));
 
 
             return strfTime;
         }
 
-        public string FormatPythonOffset(DateTimeOffset now, string strfTime)
+        public string NetTimeZoneInfoFromPythonTimeZone(string timezone)
+        {
+            switch(timezone)
+            {
+                case AdafruitTimezoneEuropeOslo:
+                    return NetTimezoneWestEuropeStandardTime;
+                case AdafruitTimezoneEuropeTallinn:
+                    return NetTimezoneEastEuropeStandardTime;
+                case AdafruitTimezoneAmericaChicago:
+                    return NetTimezoneCentralStandardTime;
+                default:
+                    // TODO: Support other timezones
+                    throw new ArgumentOutOfRangeException(nameof(timezone), SupportedTimezonesErrorMessage);
+            }
+        }
+
+        public string FormatPythonOffset(DateTimeOffset now, TimeZoneInfo tzi, string strfTime)
         {
             if (strfTime.Contains("%z"))
             {
-                string offset = now.ToString("zzz");
-                offset = offset.Replace(":", "");
+                string offset = tzi.GetUtcOffset(now).ToString("hhmm");
+                offset = tzi.BaseUtcOffset < TimeSpan.Zero ? $"-{offset}" : $"+{offset}";
                 return strfTime.Replace("%z", offset);
             }
 
@@ -44,12 +70,18 @@ namespace NetatmoProxy.Services
 
                 switch(timezone)
                 {
-                    case "Europe/Oslo":
-                        value = "CET";
+                    case AdafruitTimezoneEuropeOslo:
+                        value = PythonTimezoneCET;
+                        break;
+                    case AdafruitTimezoneEuropeTallinn:
+                        value = PythonTimezoneEET;
+                        break;
+                    case AdafruitTimezoneAmericaChicago:
+                        value = PythonTimezoneCST;
                         break;
                     default:
-                        // TODO: Support other timezones than Europe/Oslo
-                        throw new ArgumentOutOfRangeException(nameof(timezone), "Only timezone Europe/Oslo is supported");
+                        // TODO: Support other timezones
+                        throw new ArgumentOutOfRangeException(nameof(timezone), SupportedTimezonesErrorMessage);
                 }
 
                 return strfTime.Replace("%Z", value);
