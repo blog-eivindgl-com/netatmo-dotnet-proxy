@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using NetatmoProxy.Configuration;
 using NetatmoProxy.Middleware;
 using NetatmoProxy.Services;
+using System.Net.Http;
 
 namespace NetatmoProxy
 {
@@ -22,23 +24,39 @@ namespace NetatmoProxy
             builder.Logging.AddConsole();
 
             // Add services to the container.
+            builder.Services.AddHttpClient();
             builder.Services.AddMemoryCache();
             builder.Services.AddApplicationInsightsTelemetry();
             builder.Services.AddTransient<ResponseLoggerMiddleware>();
             builder.Services.AddTransient<INowService, NowService>();
             builder.Services.AddTransient<IPythonDateTimeFormatService, PythonDateTimeFormatService>();
+            
+            // DayNightService, MetSunriseApi
+            if ("MetSunriseApi".Equals(Configuration.GetValue<string>("DayNightService:Type"), StringComparison.InvariantCultureIgnoreCase))
+            {
+                var metSunriseApiConfig = new MetSunriseApiConfig();
+                Configuration.Bind("DayNightService", metSunriseApiConfig);
+                builder.Services.AddSingleton<MetSunriseApiConfig>(metSunriseApiConfig);
+                builder.Services.AddSingleton<IDayNightService, MetSunriseApiService>();
+            }
+            else
+            {
+                builder.Services.AddTransient<IDayNightService, DayNightSimpleService>();
+            }
+
+            // NetatmoApi
             var authConfig = new AuthConfig();
             Configuration.Bind("NetatmoApi:Auth", authConfig);
             builder.Services.AddSingleton(authConfig);
             builder.Services.AddSingleton<IAccessTokenService>((sp) =>
             {
-                return new AccessTokenService(authConfig, sp.GetService<ILogger<AccessTokenService>>(), new HttpClientHandler(), sp.GetService<IMemoryCache>());
+                return new AccessTokenService(authConfig, sp.GetService<ILogger<AccessTokenService>>(), HttpClientFactory.Create(), sp.GetService<IMemoryCache>());
             });
             var netatmoApiConfig = new NetatmoApiConfig();
             Configuration.Bind("NetatmoApi", netatmoApiConfig);
             builder.Services.AddSingleton<INetatmoApiService>((sp) =>
             {
-                return new NetatmoApiRestService(netatmoApiConfig, sp.GetService<ILogger<NetatmoApiRestService>>(), sp.GetService<IAccessTokenService>(), new HttpClientHandler(), sp.GetService<IMemoryCache>());
+                return new NetatmoApiRestService(netatmoApiConfig, sp.GetService<ILogger<NetatmoApiRestService>>(), sp.GetService<IAccessTokenService>(), HttpClientFactory.Create(), sp.GetService<IMemoryCache>());
             });
 
             builder.Services.AddControllers();

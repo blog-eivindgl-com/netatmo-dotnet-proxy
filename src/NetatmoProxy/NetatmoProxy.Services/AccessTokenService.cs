@@ -16,11 +16,11 @@ namespace NetatmoProxy.Services
         private readonly HttpClient _httpClient;
         private readonly IMemoryCache _memCache;
 
-        public AccessTokenService(AuthConfig config, ILogger<AccessTokenService> logger, HttpClientHandler httpClientHandler, IMemoryCache memCache)
+        public AccessTokenService(AuthConfig config, ILogger<AccessTokenService> logger, HttpClient httpClient, IMemoryCache memCache)
         {
             _config = config;
             _logger = logger;
-            _httpClient = new HttpClient(httpClientHandler);
+            _httpClient = httpClient;
             _memCache = memCache;
 
             if (string.IsNullOrEmpty(_config?.BaseUri))

@@ -10,10 +10,12 @@ namespace NetatmoProxy.Controllers
     public class DisplayController : ControllerBase
     {
         private readonly INetatmoApiService _netatmoApiService;
+        private readonly IDayNightService _dayNightService;
 
-        public DisplayController(INetatmoApiService netatmoApiService)
+        public DisplayController(INetatmoApiService netatmoApiService, IDayNightService dayNightService)
         {
             _netatmoApiService = netatmoApiService;
+            _dayNightService = dayNightService;
         }
 
         [HttpGet]
@@ -23,6 +25,8 @@ namespace NetatmoProxy.Controllers
 
             var indoor = stationData?.Body?.Devices?.FirstOrDefault();
             var outdoor = indoor?.Modules?.FirstOrDefault();
+
+            var sunOrMoon = await _dayNightService.IsSunOrMoonAsync();
 
             string FormatTemperature(decimal temperature)
             {
@@ -56,7 +60,8 @@ namespace NetatmoProxy.Controllers
                     Type = "humidity",
                     Description = name,
                     Value = data.Humidity.ToString(),
-                    BatteryLevel = batteryPercent
+                    BatteryLevel = batteryPercent,
+                    SunOrMoon = sunOrMoon
                 };
             }
 

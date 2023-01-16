@@ -17,12 +17,12 @@ namespace NetatmoProxy.Services
         private readonly HttpClient _httpClient;
         private readonly IMemoryCache _memCache;
 
-        public NetatmoApiRestService(NetatmoApiConfig config, ILogger<NetatmoApiRestService> logger, IAccessTokenService accessTokenService, HttpClientHandler httpClientHandler, IMemoryCache memCache)
+        public NetatmoApiRestService(NetatmoApiConfig config, ILogger<NetatmoApiRestService> logger, IAccessTokenService accessTokenService, HttpClient httpClient, IMemoryCache memCache)
         {
             _config = config;
             _logger = logger;
             _tokenService = accessTokenService;
-            _httpClient = new HttpClient(httpClientHandler);
+            _httpClient = httpClient;
             _memCache = memCache;
 
             if (string.IsNullOrEmpty(_config?.BaseUri))
