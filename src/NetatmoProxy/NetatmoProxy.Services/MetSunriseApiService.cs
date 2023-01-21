@@ -73,9 +73,11 @@ namespace NetatmoProxy.Services
                         {
                             DateTime key = DateTime.ParseExact(day.Date, "yyyy-MM-dd", CultureInfo.CurrentUICulture, DateTimeStyles.AssumeLocal);
                             var value = new SunriseSunset { Sunrise = day.Sunrise.Time, Sunset = day.Sunset.Time };
-                            var cacheEntry = _memCache.CreateEntry(key);
-                            cacheEntry.Value = value;
-                            cacheEntry.AbsoluteExpiration = key.AddDays(1);  // cache one day longer than the actual date
+                            var cacheExpiracy = new MemoryCacheEntryOptions
+                            {
+                                AbsoluteExpiration = key.AddDays(1)
+                            };
+                            _memCache.Set(key, value, cacheExpiracy);
                             _logger.LogInformation($"Sunrise and sunset for {key.ToString("yyyy-MM-dd")}: {value.Sunrise} and {value.Sunset}");
 
                             if (key == now.Date)
