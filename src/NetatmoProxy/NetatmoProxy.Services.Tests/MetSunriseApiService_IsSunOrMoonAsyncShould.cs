@@ -147,5 +147,49 @@ namespace NetatmoProxy.Services.Tests
             _httpMessageHandlerMock.VerifyRequest(expectedRequestUri, Times.Once());
             actualResult.ShouldBe(expectedResult, "Result as expected");
         }
+
+        // TODO: For some reason MemoryCache doesn't work as expected in a unit test, but it works when running in IIS Express
+        //[Fact]
+        public async Task GetValuesFromMemCacheTheSecondTime()
+        {
+            // Arrange
+            decimal latitude = _defaultConfig.Latitude;
+            decimal longitude = _defaultConfig.Longitude;
+            decimal height = _defaultConfig.Height;
+            string offset = "+01:00";
+            int days = 15;
+            string expectedRequestUri = $"https://api.met.no/weatherapi/sunrise/2.0/.json?lat={FormatDecimal(latitude)}&lon={FormatDecimal(longitude)}&height={FormatDecimal(height)}&date={DefaultNowDateString}&offset={offset}&days={days}";
+            var expectedResponse = new SunriseResponse
+            {
+                Location = new Location
+                {
+                    Height = height.ToString(),
+                    Latitude = latitude.ToString(),
+                    Longitude = longitude.ToString(),
+                    Time = new List<Time> {
+                        new Time
+                        {
+                            Date = DefaultNowDateString,
+                            Sunrise = new Sunrise
+                            {
+                                Time = _defaultNow.AddHours(6).AddMinutes(23)
+                            },
+                            Sunset = new Sunset
+                            {
+                                Time = _defaultNow.AddHours(20).AddMinutes(13)
+                            }
+                        }
+                    }
+                }
+            };
+            _httpMessageHandlerMock.SetupRequest(expectedRequestUri).ReturnsJsonResponse<SunriseResponse>(expectedResponse);
+
+            // Act
+            await _service.IsSunOrMoonAsync();
+            await _service.IsSunOrMoonAsync();
+
+            // Assert
+            _httpMessageHandlerMock.VerifyRequest(expectedRequestUri, Times.Once(), "api.met.no is called only once, because memcache was used the second time.");
+        }
     }
 }
