@@ -60,6 +60,7 @@ namespace NetatmoProxy.Controllers
                     Type = "humidity",
                     Description = name,
                     Value = data.Humidity.ToString(),
+                    OutTemp = data.Temperature,
                     BatteryLevel = batteryPercent,
                     SunOrMoon = sunOrMoon
                 };
