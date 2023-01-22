@@ -8,6 +8,8 @@ namespace NetatmoProxy.Model
         public string Description { get; set; }
         public string Value { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public decimal? OutTemp { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string Trend { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string MinValue { get; set; }
