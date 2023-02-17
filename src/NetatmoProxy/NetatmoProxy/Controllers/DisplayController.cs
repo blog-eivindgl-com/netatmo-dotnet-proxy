@@ -24,7 +24,8 @@ namespace NetatmoProxy.Controllers
             var stationData = await _netatmoApiService.GetStationsDataAsync(new Model.Netatmo.GetStationsDataRequest());
 
             var indoor = stationData?.Body?.Devices?.FirstOrDefault();
-            var outdoor = indoor?.Modules?.FirstOrDefault();
+            var outdoor = indoor?.Modules?.Where(m => m.ModuleName == "Vestveggen ute").FirstOrDefault();
+            var wind = indoor?.Modules?.Where(m => m.ModuleName == "EiVind").FirstOrDefault();
 
             var sunOrMoon = await _dayNightService.IsSunOrMoonAsync();
 
@@ -66,13 +67,29 @@ namespace NetatmoProxy.Controllers
                 };
             }
 
+            Widget CreateWindWidget(string name, DashboardData data, int batteryPercent)
+            {
+                return new Widget
+                {
+                    Type = "wind",
+                    Description = name,
+                    Value = "Vind".Equals(name) ? data.WindStrength.ToString() : data.GustStrength.ToString(),
+                    Angle = "Vind".Equals(name) ? data.WindAngle.ToString() : data.GustAngle.ToString(),
+                    MaxValue = data.MaxWindStrength.ToString(),
+                    MaxAngle = data.MaxWindAngle.ToString(),
+                    BatteryLevel = batteryPercent
+                };
+            }
+
             return new Display
             {
                 Widgets = new Widget[]
                 {
                     CreateTemperatureWidget(indoor.ModuleName, indoor.DashboardData),
                     CreateTemperatureWidget(outdoor.ModuleName, outdoor.DashboardData),
-                    CreateHumidityWidget(outdoor.ModuleName, outdoor.DashboardData, outdoor.BatteryPercent)
+                    CreateHumidityWidget(outdoor.ModuleName, outdoor.DashboardData, outdoor.BatteryPercent),
+                    CreateWindWidget("Vind", wind.DashboardData, wind.BatteryPercent),
+                    CreateWindWidget("Kast", wind.DashboardData, wind.BatteryPercent)
                 }
             };
         }

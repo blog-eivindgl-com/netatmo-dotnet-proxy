@@ -24,5 +24,15 @@ namespace NetatmoProxy.Model.Netatmo
         public string TempTrend { get; set; }
         [JsonPropertyName("pressure_trend")]
         public string PressureTrend { get; set; }
+        public int WindStrength { get; set; }
+        public int WindAngle { get; set; }
+        public int GustStrength { get; set; }
+        public int GustAngle { get; set; }
+        [JsonPropertyName("max_wind_str")]
+        public int MaxWindStrength { get; set; }
+        [JsonPropertyName("max_wind_angle")]
+        public int MaxWindAngle { get; set; }
+        [JsonPropertyName("date_max_wind_str")]
+        public int DateMaxWind { get; set; }
     }
 }
