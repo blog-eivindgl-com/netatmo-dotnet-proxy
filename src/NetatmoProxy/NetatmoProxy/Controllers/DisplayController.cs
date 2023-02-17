@@ -39,6 +39,11 @@ namespace NetatmoProxy.Controllers
                 return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(dateValue).ToString("dd.MM HH:mm");
             }
 
+            string FormatWindStrength(decimal strenghInKmPerHour)
+            {
+                return $"{(strenghInKmPerHour / 3.6m).ToString("n1")}m/s";
+            }
+
             Widget CreateTemperatureWidget(string name, DashboardData data)
             {
                 return new Widget
@@ -73,9 +78,9 @@ namespace NetatmoProxy.Controllers
                 {
                     Type = "wind",
                     Description = name,
-                    Value = "Vind".Equals(name) ? data.WindStrength.ToString() : data.GustStrength.ToString(),
+                    Value = "Vind".Equals(name) ? FormatWindStrength(data.WindStrength) : FormatWindStrength(data.GustStrength),
                     Angle = "Vind".Equals(name) ? data.WindAngle.ToString() : data.GustAngle.ToString(),
-                    MaxValue = data.MaxWindStrength.ToString(),
+                    MaxValue = FormatWindStrength(data.MaxWindStrength),
                     MaxAngle = data.MaxWindAngle.ToString(),
                     BatteryLevel = batteryPercent
                 };
