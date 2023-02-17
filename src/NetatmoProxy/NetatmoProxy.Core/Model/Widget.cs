@@ -23,5 +23,9 @@ namespace NetatmoProxy.Model
         public int? BatteryLevel { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string SunOrMoon { get; set; }
+        [JsonIgnore(Condition =JsonIgnoreCondition.WhenWritingNull)]
+        public string Angle { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string MaxAngle { get; set; }
     }
 }
