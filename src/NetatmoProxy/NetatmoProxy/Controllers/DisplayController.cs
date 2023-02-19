@@ -82,6 +82,7 @@ namespace NetatmoProxy.Controllers
                     Angle = "Vind".Equals(name) ? data.WindAngle.ToString() : data.GustAngle.ToString(),
                     MaxValue = FormatWindStrength(data.MaxWindStrength),
                     MaxAngle = data.MaxWindAngle.ToString(),
+                    MaxTime = FormatDateTime(data.DateMaxWind),
                     BatteryLevel = batteryPercent
                 };
             }
