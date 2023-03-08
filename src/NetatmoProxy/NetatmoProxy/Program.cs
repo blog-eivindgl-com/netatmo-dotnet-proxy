@@ -54,9 +54,16 @@ namespace NetatmoProxy
             });
             var netatmoApiConfig = new NetatmoApiConfig();
             Configuration.Bind("NetatmoApi", netatmoApiConfig);
+            builder.Services.AddSingleton<NetatmoApiConfig>(netatmoApiConfig);
             builder.Services.AddSingleton<INetatmoApiService>((sp) =>
             {
-                return new NetatmoApiRestService(netatmoApiConfig, sp.GetService<ILogger<NetatmoApiRestService>>(), sp.GetService<IAccessTokenService>(), HttpClientFactory.Create(), sp.GetService<IMemoryCache>());
+                return new NetatmoApiRestService(
+                    config: sp.GetService<NetatmoApiConfig>(),
+                    logger: sp.GetService<ILogger<NetatmoApiRestService>>(),
+                    accessTokenService: sp.GetService<IAccessTokenService>(), 
+                    httpClient: HttpClientFactory.Create(),
+                    memCache: sp.GetService<IMemoryCache>()
+                    );
             });
 
             builder.Services.AddControllers();

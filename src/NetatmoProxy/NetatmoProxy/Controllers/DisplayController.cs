@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using NetatmoProxy.Configuration;
 using NetatmoProxy.Model;
 using NetatmoProxy.Model.Netatmo;
 using NetatmoProxy.Services;
@@ -9,11 +11,13 @@ namespace NetatmoProxy.Controllers
     [ApiController]
     public class DisplayController : ControllerBase
     {
+        private readonly NetatmoApiConfig _config;
         private readonly INetatmoApiService _netatmoApiService;
         private readonly IDayNightService _dayNightService;
 
-        public DisplayController(INetatmoApiService netatmoApiService, IDayNightService dayNightService)
+        public DisplayController(NetatmoApiConfig config, INetatmoApiService netatmoApiService, IDayNightService dayNightService)
         {
+            _config = config;
             _netatmoApiService = netatmoApiService;
             _dayNightService = dayNightService;
         }
@@ -23,9 +27,31 @@ namespace NetatmoProxy.Controllers
         {
             var stationData = await _netatmoApiService.GetStationsDataAsync(new Model.Netatmo.GetStationsDataRequest());
 
-            var indoor = stationData?.Body?.Devices?.FirstOrDefault();
-            var outdoor = indoor?.Modules?.Where(m => m.ModuleName == "Vestveggen ute").FirstOrDefault();
-            var wind = indoor?.Modules?.Where(m => m.ModuleName == "EiVind").FirstOrDefault();
+            IEnumerable<Device> indoorModules = stationData?.Body?.Devices;
+            var outdoorTemperatureModules = new List<Module>();
+            var outdoorWindModules = new List<Module>();
+
+            foreach (var indoorModule in indoorModules)
+            {
+                outdoorTemperatureModules.AddRange(
+                    from m in indoorModule.Modules
+                    where _config.Modules.Contains(m.ModuleName, StringComparer.InvariantCultureIgnoreCase)
+                    && m.DataType.Contains("Temperature") && m.DashboardData != null
+                    select m
+                    );
+                outdoorWindModules.AddRange(
+                    from m in indoorModule.Modules
+                    where _config.Modules.Contains(m.ModuleName, StringComparer.InvariantCultureIgnoreCase)
+                    && m.DataType.Contains("Wind") && m.DashboardData != null
+                    select m
+                    );
+            }
+
+            // Exclude indoor modules not configured for display
+            indoorModules = (from d in indoorModules
+                            where _config.Modules.Contains(d.ModuleName)
+                            && d.DashboardData != null
+                            select d).ToList();
 
             var sunOrMoon = await _dayNightService.IsSunOrMoonAsync();
 
@@ -87,16 +113,16 @@ namespace NetatmoProxy.Controllers
                 };
             }
 
+            var widgets = new List<Widget>();
+            widgets.AddRange(indoorModules.Select(m => CreateTemperatureWidget(m.ModuleName, m.DashboardData)));
+            widgets.AddRange(outdoorTemperatureModules.Select(m => CreateTemperatureWidget(m.ModuleName, m.DashboardData)));
+            widgets.AddRange(outdoorTemperatureModules.Select(m => CreateHumidityWidget(m.ModuleName, m.DashboardData, m.BatteryPercent)));
+            widgets.AddRange(outdoorWindModules.Select(m => CreateWindWidget("Vind", m.DashboardData, m.BatteryPercent)));
+            widgets.AddRange(outdoorWindModules.Select(m => CreateWindWidget("Kast", m.DashboardData, m.BatteryPercent)));
+
             return new Display
             {
-                Widgets = new Widget[]
-                {
-                    CreateTemperatureWidget(indoor.ModuleName, indoor.DashboardData),
-                    CreateTemperatureWidget(outdoor.ModuleName, outdoor.DashboardData),
-                    CreateHumidityWidget(outdoor.ModuleName, outdoor.DashboardData, outdoor.BatteryPercent),
-                    CreateWindWidget("Vind", wind.DashboardData, wind.BatteryPercent),
-                    CreateWindWidget("Kast", wind.DashboardData, wind.BatteryPercent)
-                }
+                Widgets = widgets
             };
         }
     }
