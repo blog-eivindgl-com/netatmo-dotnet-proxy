@@ -30,6 +30,7 @@ namespace NetatmoProxy.Controllers
             IEnumerable<Device> indoorModules = stationData?.Body?.Devices;
             var outdoorTemperatureModules = new List<Module>();
             var outdoorWindModules = new List<Module>();
+            var batteryIndicators = new List<BatteryIndicator>();
 
             foreach (var indoorModule in indoorModules)
             {
@@ -45,6 +46,14 @@ namespace NetatmoProxy.Controllers
                     && m.DataType.Contains("Wind") && m.DashboardData != null
                     select m
                     );
+                batteryIndicators.AddRange(
+                    from m in indoorModule.Modules
+                    where _config.Modules.Contains(m.ModuleName, StringComparer.InvariantCultureIgnoreCase)
+                    select new BatteryIndicator
+                    {
+                        ModuleName = m.ModuleName,
+                        BatteryLevel = m.BatteryPercent
+                    });
             }
 
             // Exclude indoor modules not configured for display
@@ -94,7 +103,8 @@ namespace NetatmoProxy.Controllers
                     Value = data.Humidity.ToString(),
                     OutTemp = data.Temperature,
                     BatteryLevel = batteryPercent,
-                    SunOrMoon = sunOrMoon
+                    SunOrMoon = sunOrMoon,
+                    BatteryIndicators = batteryIndicators.ToArray()
                 };
             }
 
