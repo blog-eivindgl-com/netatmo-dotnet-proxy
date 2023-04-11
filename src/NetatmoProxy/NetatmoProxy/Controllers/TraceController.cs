@@ -4,7 +4,7 @@ namespace NetatmoProxy.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-
+    [Microsoft.AspNetCore.Cors.EnableCors(Program.MyAllowSpecificOrigins)]
     public class TraceController : ControllerBase
     {
         private readonly ILogger<TraceController> _logger;

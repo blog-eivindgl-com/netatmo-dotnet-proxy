@@ -8,6 +8,7 @@ namespace NetatmoProxy.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Microsoft.AspNetCore.Cors.EnableCors(Program.MyAllowSpecificOrigins)]
     public class DisplayController : ControllerBase
     {
         private readonly ILogger<DisplayController> _logger;

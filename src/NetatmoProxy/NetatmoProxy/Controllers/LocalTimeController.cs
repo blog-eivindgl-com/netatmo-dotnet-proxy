@@ -5,6 +5,7 @@ namespace NetatmoProxy.Controllers
 {
     [Route("api/v2/{username}/integrations/time")]
     [ApiController]
+    [Microsoft.AspNetCore.Cors.EnableCors(Program.MyAllowSpecificOrigins)]
     public class LocalTimeController : ControllerBase
     {
         private readonly IPythonDateTimeFormatService _dateTimeFormatService;

@@ -9,6 +9,7 @@ namespace NetatmoProxy
 {
     public class Program
     {
+        public const string MyAllowSpecificOrigins = "_MyAllowSubdomainPolicy";
         public static IConfigurationRoot Configuration { get; set; }
 
         public static void Main(string[] args)
@@ -66,6 +67,16 @@ namespace NetatmoProxy
                     );
             });
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost:3000")
+                            .WithMethods("GET", "POST");
+                    });
+            });
+
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -79,7 +90,7 @@ namespace NetatmoProxy
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseCors(MyAllowSpecificOrigins);
             app.UseAuthorization();
             app.UseResponseLogger();
 
