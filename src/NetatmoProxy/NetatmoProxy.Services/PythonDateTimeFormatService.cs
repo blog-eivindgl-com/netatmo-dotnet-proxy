@@ -1,4 +1,6 @@
-﻿namespace NetatmoProxy.Services
+﻿using Prometheus;
+
+namespace NetatmoProxy.Services
 {
     public class PythonDateTimeFormatService : IPythonDateTimeFormatService
     {
@@ -12,6 +14,7 @@
         public const string NetTimezoneWestEuropeStandardTime = "W. Europe Standard Time";
         public const string NetTimezoneEastEuropeStandardTime = "E. Europe Standard Time";
         public const string NetTimezoneCentralStandardTime = "Central Standard Time";
+        private static readonly Counter StrfTimeCalls = Metrics.CreateCounter($"{nameof(PythonDateTimeFormatService).ToLower()}_{nameof(StrfTime).ToLower()}calls_total", "Number of times StrfTime has been called.");
 
         private readonly INowService _nowService;
 
@@ -22,6 +25,7 @@
 
         public string StrfTime(string timezone, string format)
         {
+            StrfTimeCalls.Inc();
             var tzi = TimeZoneInfo.FindSystemTimeZoneById(NetTimeZoneInfoFromPythonTimeZone(timezone));
             var now = TimeZoneInfo.ConvertTimeFromUtc(_nowService.UtcNow, tzi);
             string strfTime = FormatPythonDayOfYear(now, format);
