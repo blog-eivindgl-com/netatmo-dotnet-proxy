@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using NetatmoProxy.Configuration;
 using NetatmoProxy.Model;
 using NetatmoProxy.Model.MetSunrise;
+using Prometheus;
 using System.Globalization;
 using System.Net.Http.Json;
 
@@ -10,8 +11,12 @@ namespace NetatmoProxy.Services
 {
     public class MetSunriseApiService : IDayNightService
     {
+        public const string HttpClientName = "MetSunriseApiServiceHttpClient";
         public const string UserAgentString = @"NetatmoProxy/1.0 github.com/blog-eivindgl-com/netatmo-dotnet-proxy";
         public const string BaseUri = @"https://api.met.no/weatherapi/sunrise/2.0/";
+        private static readonly Counter IsSunOrMoonCalls = Metrics.CreateCounter("metsunriseapiservice_issunormooncalls_total", "Number of times IsSunOrMoonAsync has been called.");
+        private static readonly Counter MetApiCalls = Metrics.CreateCounter("metsunriseapiservice_externalapicalls_total", "Number of times the external Met API has been called.");
+        private static readonly Counter MetApiErrors = Metrics.CreateCounter("metsunriseapiservice_externalapierrors_total", "Number of failed calls to the external Met API.");
         private readonly string _latitude;
         private readonly string _longitude;
         private readonly string _height;
@@ -42,6 +47,7 @@ namespace NetatmoProxy.Services
         {
             var now = _nowService.DateTimeNow;
             SunriseSunset? sunriseSunset;
+            IsSunOrMoonCalls.Inc();
 
             if (!_memCache.TryGetValue(now.Date, out sunriseSunset))
             {
@@ -49,7 +55,8 @@ namespace NetatmoProxy.Services
                 var offset = TimeZoneInfo.Local.GetUtcOffset(now).ToString(@"hh\:mm");
                 offset = TimeZoneInfo.Local.BaseUtcOffset < TimeSpan.Zero ? $"-{offset}" : $"+{offset}";
                 var request = $".json?lat={_latitude}&lon={_longitude}&height={_height}&date={now.ToString("yyyy-MM-dd")}&offset={offset}&days={_days}";
-                
+
+                MetApiCalls.Inc();
                 var response = await _httpClient.GetAsync(request);
 
                 try
@@ -58,6 +65,7 @@ namespace NetatmoProxy.Services
                 }
                 catch
                 {
+                    MetApiErrors.CountExceptions(() => request);
                     _logger.LogError(await response.Content.ReadAsStringAsync());
                     throw;
                 }

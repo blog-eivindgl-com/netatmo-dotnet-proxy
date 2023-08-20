@@ -3,14 +3,21 @@ using Microsoft.Extensions.Logging;
 using NetatmoProxy.Configuration;
 using NetatmoProxy.Model;
 using NetatmoProxy.Model.Netatmo;
+using Prometheus;
 using System.Net.Http.Json;
 
 namespace NetatmoProxy.Services
 {
     public class AccessTokenService : IAccessTokenService
     {
+        public const string HttpClientName = "AccessTokenServiceHttpClient";
         public const string TokenResponseCacheKey = "TokenResponse";
         public const string BaseUri = @"https://api.netatmo.net/oauth2/token";
+        private static readonly Counter GetAccessTokenCalls = Metrics.CreateCounter($"{nameof(AccessTokenService).ToLower()}_{nameof(GetAccessTokenAsync).ToLower()}calls_total", "Number of times GetAccessTokenAsync has been called.");
+        private static readonly Counter NetatmoApiCalls = Metrics.CreateCounter($"{nameof(AccessTokenService).ToLower()}_externalapicalls_total", "Number of times the external Netatmo STS has been called.");
+        private static readonly Counter NetatmoApiErrors = Metrics.CreateCounter($"{nameof(AccessTokenService).ToLower()}_externalapierrors_total", "Number of failed calls to the external Netatmo STS.");
+        private static readonly Counter NetatmoApiRefreshTokenCalls = Metrics.CreateCounter($"{nameof(AccessTokenService).ToLower()}_refreshtoken_externalapicalls_total", "Number of times the external Netatmo STS refresh token has been called.");
+        private static readonly Counter NetatmoApiRefreshTokenErrors = Metrics.CreateCounter($"{nameof(AccessTokenService).ToLower()}_refreshtoken_externalapierrors_total", "Number of failed calls to the external Netatmo STS refresh token.");
         private readonly AuthConfig _config;
         private readonly ILogger<AccessTokenService> _logger;
         private readonly HttpClient _httpClient;
@@ -35,6 +42,7 @@ namespace NetatmoProxy.Services
 
         public async Task<string> GetAccessTokenAsync(bool forceFullLoad = false)
         {
+            GetAccessTokenCalls.Inc();
             var now = DateTimeOffset.Now;  // Time before request is sent
             TokenResponseWrapper? tokenResponseWrapper = _memCache.Get<TokenResponseWrapper>(TokenResponseCacheKey);
             TokenResponse? tokenResponse = null;
@@ -92,6 +100,7 @@ namespace NetatmoProxy.Services
                     new KeyValuePair<string, string>("password", _config.Password)
                 });
             _logger.LogDebug($"First time token, Uri: {_httpClient.BaseAddress}, Content: {await request.Content.ReadAsStringAsync()}");
+            NetatmoApiCalls.Inc();
             var response = await _httpClient.SendAsync(request);
             
             try
@@ -101,6 +110,7 @@ namespace NetatmoProxy.Services
             catch
             {
                 _logger.LogError(await response.Content.ReadAsStringAsync());
+                NetatmoApiErrors.CountExceptions(() => request.RequestUri.AbsoluteUri);
                 throw;
             }
 
@@ -120,6 +130,7 @@ namespace NetatmoProxy.Services
                     new KeyValuePair<string, string>("client_secret", _config.ClientSecret)
                 });
             _logger.LogDebug($"Refresh token, Uri: {_httpClient.BaseAddress}, Content: {await request.Content.ReadAsStringAsync()}");
+            NetatmoApiRefreshTokenCalls.Inc();
             var response = await _httpClient.SendAsync(request);
             
             try
@@ -129,6 +140,7 @@ namespace NetatmoProxy.Services
             catch
             {
                 _logger.LogError(await response.Content.ReadAsStringAsync());
+                NetatmoApiRefreshTokenErrors.CountExceptions(() => request.RequestUri.AbsoluteUri);
                 throw;
             }
 

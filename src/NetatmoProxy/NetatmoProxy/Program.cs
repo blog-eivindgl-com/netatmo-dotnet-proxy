@@ -1,9 +1,8 @@
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
 using NetatmoProxy.Configuration;
 using NetatmoProxy.Middleware;
 using NetatmoProxy.Services;
-using System.Net.Http;
+using Prometheus;
 
 namespace NetatmoProxy
 {
@@ -30,6 +29,11 @@ namespace NetatmoProxy
             builder.Services.AddTransient<ResponseLoggerMiddleware>();
             builder.Services.AddTransient<INowService, NowService>();
             builder.Services.AddTransient<IPythonDateTimeFormatService, PythonDateTimeFormatService>();
+
+            // Healthcheck
+            builder.Services.AddHealthChecks()
+                .AddCheck<HealthCheck>(nameof(HealthCheck))
+                .ForwardToPrometheus();
             
             // DayNightService, MetSunriseApi
             if ("MetSunriseApi".Equals(Configuration.GetValue<string>("DayNightService:Type"), StringComparison.InvariantCultureIgnoreCase))
@@ -37,7 +41,16 @@ namespace NetatmoProxy
                 var metSunriseApiConfig = new MetSunriseApiConfig();
                 Configuration.Bind("DayNightService", metSunriseApiConfig);
                 builder.Services.AddSingleton<MetSunriseApiConfig>(metSunriseApiConfig);
-                builder.Services.AddSingleton<IDayNightService, MetSunriseApiService>();
+                builder.Services.AddSingleton<IDayNightService>((sp) =>
+                {
+                    return new MetSunriseApiService(
+                        config: metSunriseApiConfig,
+                        logger: sp.GetService<ILogger<MetSunriseApiService>>(),
+                        httpClient: sp.GetService<IHttpClientFactory>().CreateClient(MetSunriseApiService.HttpClientName),
+                        memCache: sp.GetService<IMemoryCache>(),
+                        nowService: sp.GetService<INowService>()
+                        );
+                });
             }
             else
             {
@@ -50,7 +63,12 @@ namespace NetatmoProxy
             builder.Services.AddSingleton(authConfig);
             builder.Services.AddSingleton<IAccessTokenService>((sp) =>
             {
-                return new AccessTokenService(authConfig, sp.GetService<ILogger<AccessTokenService>>(), HttpClientFactory.Create(), sp.GetService<IMemoryCache>());
+                return new AccessTokenService(
+                    config: authConfig, 
+                    logger: sp.GetService<ILogger<AccessTokenService>>(),
+                    httpClient: sp.GetService<IHttpClientFactory>().CreateClient(AccessTokenService.HttpClientName),
+                    memCache: sp.GetService<IMemoryCache>()
+                    );
             });
             var netatmoApiConfig = new NetatmoApiConfig();
             Configuration.Bind("NetatmoApi", netatmoApiConfig);
@@ -61,12 +79,13 @@ namespace NetatmoProxy
                     config: sp.GetService<NetatmoApiConfig>(),
                     logger: sp.GetService<ILogger<NetatmoApiRestService>>(),
                     accessTokenService: sp.GetService<IAccessTokenService>(), 
-                    httpClient: HttpClientFactory.Create(),
+                    httpClient: sp.GetService<IHttpClientFactory>().CreateClient(NetatmoApiRestService.HttpClientName),
                     memCache: sp.GetService<IMemoryCache>()
                     );
             });
 
             builder.Services.AddControllers();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -80,10 +99,12 @@ namespace NetatmoProxy
                 app.UseSwaggerUI();
             }
 
+            app.UseHttpMetrics();
             app.UseAuthorization();
             app.UseResponseLogger();
 
             app.MapControllers();
+            app.MapMetrics();
 
             app.Run();
         }
