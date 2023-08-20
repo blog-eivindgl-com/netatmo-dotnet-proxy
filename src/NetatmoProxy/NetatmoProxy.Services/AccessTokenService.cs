@@ -61,7 +61,7 @@ namespace NetatmoProxy.Services
             }
             else
             {
-                tokenResponse = await GetTokenFirstTimeAsync();
+                tokenResponse = await RefreshTokenAsync(_config.RefreshToken);
             }
 
             if (tokenResponse != null)
@@ -84,37 +84,6 @@ namespace NetatmoProxy.Services
             }
 
             return "invalid-token";
-        }
-
-        private async Task<TokenResponse?> GetTokenFirstTimeAsync()
-        {
-            var request = new HttpRequestMessage();
-            request.Method = HttpMethod.Post;
-            request.Content = new FormUrlEncodedContent(
-                new KeyValuePair<string, string>[]
-                {
-                    new KeyValuePair<string, string>("grant_type", _config.GrantType),
-                    new KeyValuePair<string, string>("client_id", _config.ClientId),
-                    new KeyValuePair<string, string>("client_secret", _config.ClientSecret),
-                    new KeyValuePair<string, string>("username", _config.Username),
-                    new KeyValuePair<string, string>("password", _config.Password)
-                });
-            _logger.LogDebug($"First time token, Uri: {_httpClient.BaseAddress}, Content: {await request.Content.ReadAsStringAsync()}");
-            NetatmoApiCalls.Inc();
-            var response = await _httpClient.SendAsync(request);
-            
-            try
-            {
-                response.EnsureSuccessStatusCode();
-            }
-            catch
-            {
-                _logger.LogError(await response.Content.ReadAsStringAsync());
-                NetatmoApiErrors.CountExceptions(() => request.RequestUri.AbsoluteUri);
-                throw;
-            }
-
-            return await response.Content.ReadFromJsonAsync<TokenResponse>();
         }
 
         private async Task<TokenResponse?> RefreshTokenAsync(string refreshToken)
