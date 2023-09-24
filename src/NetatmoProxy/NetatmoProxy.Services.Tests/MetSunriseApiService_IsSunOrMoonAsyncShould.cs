@@ -33,7 +33,7 @@ namespace NetatmoProxy.Services.Tests
             _services.AddMemoryCache();
             _serviceProvider = _services.BuildServiceProvider();
             _defaultNow = ParseDateTime(DefaultNowString);
-            _defaultConfig = new MetSunriseApiConfig { Height = 100, Latitude = 12.56m, Longitude = 12.56m };
+            _defaultConfig = new MetSunriseApiConfig { Latitude = 12.56m, Longitude = 12.56m };
             _loggerMock = new Mock<ILogger<MetSunriseApiService>>();
             _httpMessageHandlerMock = new Mock<HttpMessageHandler>();
             var factory = _httpMessageHandlerMock.CreateClientFactory();
@@ -61,40 +61,96 @@ namespace NetatmoProxy.Services.Tests
             // Arrange
             decimal latitude = _defaultConfig.Latitude;
             decimal longitude = _defaultConfig.Longitude;
-            decimal height = _defaultConfig.Height;
             string offset = "+01:00";
-            int days = 15;
-            string expectedRequestUri = $"https://api.met.no/weatherapi/sunrise/2.0/.json?lat={FormatDecimal(latitude)}&lon={FormatDecimal(longitude)}&height={FormatDecimal(height)}&date={DefaultNowDateString}&offset={offset}&days={days}";
+            int days = 2;
+            string expectedRequestUri = $"https://api.met.no/weatherapi/sunrise/3.0/sun?lat={FormatDecimal(latitude)}&lon={FormatDecimal(longitude)}&date={DefaultNowDateString}&offset={offset}";
             var expectedResponse = new SunriseResponse
             {
-                Location = new Location
+                Geometry = new Geometry
                 {
-                    Height = height.ToString(),
-                    Latitude = latitude.ToString(),
-                    Longitude = longitude.ToString(),
-                    Time = new List<Time> {
-                        new Time
-                        {
-                            Date = DefaultNowDateString,
-                            Sunrise = new Sunrise
-                            {
-                                Time = _defaultNow.AddHours(6).AddMinutes(23)
-                            },
-                            Sunset = new Sunset
-                            {
-                                Time = _defaultNow.AddHours(20).AddMinutes(13)
-                            }
-                        }
+                    Type = "Point",
+                    Coordinates = new decimal[] { 12.5m, 12.5m }
+                },
+                When = new When
+                {
+                    Interval = new DateTime[] { _defaultNow.AddHours(23).AddMinutes(31), _defaultNow.AddDays(1).AddHours(23).AddMinutes(31) }
+                },
+                Properties = new Properties
+                {
+                    Body = "Sun",
+                    Sunrise = new RiseSet
+                    {
+                        Time = _defaultNow.AddHours(6).AddMinutes(23),
+                        Azimuth = 138.76m
+                    },
+                    Sunset = new RiseSet
+                    {
+                        Time = _defaultNow.AddHours(20).AddMinutes(13),
+                        Azimuth = 221.39m
+                    },
+                    Solarnoon = new Noon
+                    {
+                        Time = _defaultNow.AddDays(1).AddHours(12).AddMinutes(41),
+                        Elevation = 6.36m,
+                        Visible = true
+                    },
+                    Solarmidnight = new Noon
+                    {
+                        Time = _defaultNow.AddDays(1).AddMinutes(41),
+                        Elevation = -48.33m,
+                        Visible = false
                     }
                 }
             };
             _httpMessageHandlerMock.SetupRequest(expectedRequestUri).ReturnsJsonResponse<SunriseResponse>(expectedResponse);
+            string day2String = _defaultNow.Date.AddDays(1).ToString("yyyy-MM-dd");
+            string expectedRequestUriDay2 = $"https://api.met.no/weatherapi/sunrise/3.0/sun?lat={FormatDecimal(latitude)}&lon={FormatDecimal(longitude)}&date={day2String}&offset={offset}";
+            var expectedResponseDay2 = new SunriseResponse
+            {
+                Geometry = new Geometry
+                {
+                    Type = "Point",
+                    Coordinates = new decimal[] { 12.5m, 12.5m }
+                },
+                When = new When
+                {
+                    Interval = new DateTime[] { _defaultNow.AddDays(1).AddHours(23).AddMinutes(31), _defaultNow.AddDays(2).AddHours(23).AddMinutes(31) }
+                },
+                Properties = new Properties
+                {
+                    Body = "Sun",
+                    Sunrise = new RiseSet
+                    {
+                        Time = _defaultNow.AddDays(1).AddHours(6).AddMinutes(23),
+                        Azimuth = 138.76m
+                    },
+                    Sunset = new RiseSet
+                    {
+                        Time = _defaultNow.AddDays(1).AddHours(20).AddMinutes(13),
+                        Azimuth = 221.39m
+                    },
+                    Solarnoon = new Noon
+                    {
+                        Time = _defaultNow.AddDays(2).AddHours(12).AddMinutes(41),
+                        Elevation = 6.36m,
+                        Visible = true
+                    },
+                    Solarmidnight = new Noon
+                    {
+                        Time = _defaultNow.AddDays(2).AddMinutes(41),
+                        Elevation = -48.33m,
+                        Visible = false
+                    }
+                }
+            };
+            _httpMessageHandlerMock.SetupRequest(expectedRequestUriDay2).ReturnsJsonResponse<SunriseResponse>(expectedResponseDay2);
 
             // Act
             await _service.IsSunOrMoonAsync();
 
             // Assert
             _httpMessageHandlerMock.VerifyRequest(expectedRequestUri, Times.Once());
+            _httpMessageHandlerMock.VerifyRequest(expectedRequestUriDay2, Times.Once());
         }
 
         [Theory]
@@ -109,42 +165,68 @@ namespace NetatmoProxy.Services.Tests
             // Arrange
             decimal latitude = _defaultConfig.Latitude;
             decimal longitude = _defaultConfig.Longitude;
-            decimal height = _defaultConfig.Height;
             string offset = "+01:00";
-            int days = 15;
-            _nowServiceMock.SetupGet(s => s.DateTimeNow).Returns(ParseDateTime(mockedNow));
-            string mockedDate = _nowServiceMock.Object.DateTimeNow.ToString("yyyy-MM-dd");
-            string expectedRequestUri = $"https://api.met.no/weatherapi/sunrise/2.0/.json?lat={FormatDecimal(latitude)}&lon={FormatDecimal(longitude)}&height={FormatDecimal(height)}&date={mockedDate}&offset={offset}&days={days}";
-            var expectedResponse = new SunriseResponse
+            DateTime mockedNowValue = ParseDateTime(mockedNow);
+            _nowServiceMock.SetupGet(s => s.DateTimeNow).Returns(mockedNowValue);
+
+            string mockRequestResponse(int day)
             {
-                Location = new Location
+                DateTime mockedDateValue = mockedNowValue.Date.AddDays(day - 1);
+                string mockedDate = mockedDateValue.ToString("yyyy-MM-dd");
+
+                string expectedRequestUri = $"https://api.met.no/weatherapi/sunrise/3.0/sun?lat={FormatDecimal(latitude)}&lon={FormatDecimal(longitude)}&date={mockedDate}&offset={offset}";
+                var expectedResponse = new SunriseResponse
                 {
-                    Height = height.ToString(),
-                    Latitude = latitude.ToString(),
-                    Longitude = longitude.ToString(),
-                    Time = new List<Time> {
-                        new Time
+                    Geometry = new Geometry
+                    {
+                        Type = "Point",
+                        Coordinates = new decimal[] { longitude, latitude }
+                    },
+                    When = new When
+                    {
+                        Interval = new DateTime[] { mockedDateValue.AddHours(23).AddMinutes(31), mockedDateValue.AddDays(1).AddHours(23).AddMinutes(31) }
+                    },
+                    Properties = new Properties
+                    {
+                        Body = "Sun",
+                        Sunrise = new RiseSet
                         {
-                            Date = ParseDateTime(mockedSunrise).ToString("yyyy-MM-dd"),
-                            Sunrise = new Sunrise
-                            {
-                                Time = ParseDateTime(mockedSunrise)
-                            },
-                            Sunset = new Sunset
-                            {
-                                Time = ParseDateTime(mockedSunset)
-                            }
+                            Time = ParseDateTime(mockedSunrise).AddDays(day - 1),
+                            Azimuth = 138.76m
+                        },
+                        Sunset = new RiseSet
+                        {
+                            Time = ParseDateTime(mockedSunset).AddDays(day - 1),
+                            Azimuth = 221.39m
+                        },
+                        Solarnoon = new Noon
+                        {
+                            Time = mockedDateValue.AddDays(1).AddHours(12).AddMinutes(41),
+                            Elevation = 6.36m,
+                            Visible = true
+                        },
+                        Solarmidnight = new Noon
+                        {
+                            Time = mockedDateValue.AddDays(1).AddMinutes(41),
+                            Elevation = -48.33m,
+                            Visible = false
                         }
                     }
-                }
-            };
-            _httpMessageHandlerMock.SetupRequest(expectedRequestUri).ReturnsJsonResponse<SunriseResponse>(expectedResponse);
+                };
+                _httpMessageHandlerMock.SetupRequest(expectedRequestUri).ReturnsJsonResponse<SunriseResponse>(expectedResponse);
+
+                return expectedRequestUri;
+            }
+
+            string expectedRequestUriDay1 = mockRequestResponse(1);
+            string expectedRequestUriDay2 = mockRequestResponse(2);
 
             // Act
             string actualResult = await _service.IsSunOrMoonAsync();
 
             // Assert
-            _httpMessageHandlerMock.VerifyRequest(expectedRequestUri, Times.Once());
+            _httpMessageHandlerMock.VerifyRequest(expectedRequestUriDay1, Times.Once());
+            _httpMessageHandlerMock.VerifyRequest(expectedRequestUriDay2, Times.Once());
             actualResult.ShouldBe(expectedResult, "Result as expected");
         }
 
@@ -155,30 +237,44 @@ namespace NetatmoProxy.Services.Tests
             // Arrange
             decimal latitude = _defaultConfig.Latitude;
             decimal longitude = _defaultConfig.Longitude;
-            decimal height = _defaultConfig.Height;
             string offset = "+01:00";
             int days = 15;
-            string expectedRequestUri = $"https://api.met.no/weatherapi/sunrise/2.0/.json?lat={FormatDecimal(latitude)}&lon={FormatDecimal(longitude)}&height={FormatDecimal(height)}&date={DefaultNowDateString}&offset={offset}&days={days}";
+            string expectedRequestUri = $"https://api.met.no/weatherapi/sunrise/2.0/.json?lat={FormatDecimal(latitude)}&lon={FormatDecimal(longitude)}&date={DefaultNowDateString}&offset={offset}";
             var expectedResponse = new SunriseResponse
             {
-                Location = new Location
+                Geometry = new Geometry
                 {
-                    Height = height.ToString(),
-                    Latitude = latitude.ToString(),
-                    Longitude = longitude.ToString(),
-                    Time = new List<Time> {
-                        new Time
-                        {
-                            Date = DefaultNowDateString,
-                            Sunrise = new Sunrise
-                            {
-                                Time = _defaultNow.AddHours(6).AddMinutes(23)
-                            },
-                            Sunset = new Sunset
-                            {
-                                Time = _defaultNow.AddHours(20).AddMinutes(13)
-                            }
-                        }
+                    Type = "Point",
+                    Coordinates = new decimal[] { 12.5m, 12.5m }
+                },
+                When = new When
+                {
+                    Interval = new DateTime[] { _defaultNow.AddHours(23).AddMinutes(31), _defaultNow.AddDays(1).AddHours(23).AddMinutes(31) }
+                },
+                Properties = new Properties
+                {
+                    Body = "Sun",
+                    Sunrise = new RiseSet
+                    {
+                        Time = _defaultNow.AddHours(6).AddMinutes(23),
+                        Azimuth = 138.76m
+                    },
+                    Sunset = new RiseSet
+                    {
+                        Time = _defaultNow.AddHours(20).AddMinutes(13),
+                        Azimuth = 221.39m
+                    },
+                    Solarnoon = new Noon
+                    {
+                        Time = _defaultNow.AddDays(1).AddHours(12).AddMinutes(41),
+                        Elevation = 6.36m,
+                        Visible = true
+                    },
+                    Solarmidnight = new Noon
+                    {
+                        Time = _defaultNow.AddDays(1).AddMinutes(41),
+                        Elevation = -48.33m,
+                        Visible = false
                     }
                 }
             };

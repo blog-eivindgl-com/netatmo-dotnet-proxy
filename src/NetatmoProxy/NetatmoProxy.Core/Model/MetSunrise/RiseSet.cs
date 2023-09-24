@@ -2,10 +2,10 @@
 
 namespace NetatmoProxy.Model.MetSunrise
 {
-    public class Sunset
+    public class RiseSet
     {
-        [JsonPropertyName("desc")]
-        public string Desc { get; set; }
+        [JsonPropertyName("azimuth")]
+        public decimal Azimuth { get; set; }
 
         [JsonPropertyName("time")]
         public DateTime Time { get; set; }
