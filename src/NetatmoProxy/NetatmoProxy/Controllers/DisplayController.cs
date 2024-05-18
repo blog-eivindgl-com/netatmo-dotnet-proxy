@@ -151,7 +151,7 @@ namespace NetatmoProxy.Controllers
             }
             catch(Exception ex)
             {
-                _logger.LogError(ex, "An error occured calling any of the APIs for the Display data");
+                _logger.LogError(ex, "An error occurred calling any of the APIs for the Display data");
             }
 
             return null;
