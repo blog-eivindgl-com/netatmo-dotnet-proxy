@@ -84,6 +84,11 @@ namespace NetatmoProxy
                     );
             });
 
+            // Simulation
+            var simulationConfig = new SimulationConfig();
+            Configuration.Bind("Simulation", simulationConfig);
+            builder.Services.AddSingleton<SimulationConfig>(simulationConfig);
+
             builder.Services.AddControllers();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
